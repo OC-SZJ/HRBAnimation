@@ -59,7 +59,8 @@ static NSString *HRBAnimationKeyPath_shadow_offset = @"shadowOffset";
 static NSString *HRBAnimationKeyPath_shadow_opacity = @"shadowOpacity";
 ///阴影圆角
 static NSString *HRBAnimationKeyPath_shadow_radius = @"shadowRadius";
-
+/// 结束位置
+static NSString *HRBAnimationKeyPath_draw_strokeEnd = @"strokeEnd";
 
 
 typedef NS_ENUM(NSInteger, HRBAnimationType) {
@@ -69,15 +70,29 @@ typedef NS_ENUM(NSInteger, HRBAnimationType) {
     HRBAnimationType_rotate,
     /// 缩放 value传入 @(float(缩放比例))
     HRBAnimationType_zoom,
-    
     /// 翻转 value传入 @(CATransform3DMakeRotation (翻转角度))
-    HRBAnimationType_transform3D
     /// angle: 弧度
     /// x:竖直方向 [-1,1]
     /// y:水平方向 [-1,1]
     /// z:暂时没发现有啥用
     /// CATransform3DMakeRotation(angle,x,y,z)
+    HRBAnimationType_transform3D,
 };
+
+typedef NS_OPTIONS(NSInteger, HRBDrawAnimationType) {
+
+    /// 画线 value 传入 @(CGPoint)
+    HRBDrawAnimationType_Line             = 1 << 8,
+    /// 画圆 value 传入 @(CGPoint)
+    HRBDrawAnimationType_Circular         = 1 << 9,
+    
+    ///串行(一个一个来)
+    HRBDrawAnimationDrawType_Serial       = 1 << 16,
+    ///并行(一起来)
+    HRBDrawAnimationDrawType_Parallel     = 1 << 17
+    
+};
+
 typedef NS_ENUM(NSInteger, HRBTransframType) {
     HRBTransframType_Null = 0,
     /// 平移
@@ -88,10 +103,69 @@ typedef NS_ENUM(NSInteger, HRBTransframType) {
     HRBTransframType_zoom,
     /// 翻转
     HRBTransframType_transform3D
-
+    
 };
+
+
 
 /// 角度转弧度
 static inline float HRBAngleToRadian(float angle){
     return angle * M_PI / 180.f;
+}
+
+
+struct HRBCircularSet {
+    BOOL isBezierPath;
+    
+    /// 贝塞尔曲线
+    
+    /// 开始点
+    CGPoint beginPoint;
+    /// 结束点
+    CGPoint endPoint;
+    /// 第一控制点
+    CGPoint firstPoint;
+    /// 第二控制点
+    CGPoint secondPoint;
+    
+    ///标准圆
+    ///
+    ///中心点
+    CGPoint center;
+    ///半径
+    float radius;
+    ///开始角度
+    float startAngle;
+    ///结束角度
+    float endAngle;
+    ///是否顺时针
+    BOOL  clockwise;
+
+};
+typedef struct HRBCircularSet HRBCircularSet;
+
+
+#define HRBCGPointNull CGPointMake(MAXFLOAT,MAXFLOAT)
+
+
+/// 创建贝塞尔曲线
+static NSValue * HRBCircularPointsMakeBezierPath(CGPoint beginPoint,CGPoint endPoint,CGPoint firstPoint, CGPoint secondPoint){
+    HRBCircularSet set;
+    set.isBezierPath = YES;
+    set.beginPoint = beginPoint;
+    set.endPoint = endPoint;
+    set.firstPoint = firstPoint;
+    set.secondPoint = secondPoint;
+    return [NSValue value:&set withObjCType:@encode(HRBCircularSet)];
+}
+/// 创建标准圆
+static NSValue * HRBCircularPointsMakeCircular(CGPoint center,float radius, float startAngle, float endAngle, BOOL clockwise){
+    HRBCircularSet set;
+    set.isBezierPath = NO;
+    set.center = center;
+    set.radius = radius;
+    set.startAngle = startAngle;
+    set.endAngle = endAngle;
+    set.clockwise = clockwise;
+    return  [NSValue value:&set withObjCType:@encode(HRBCircularSet)];
 }
