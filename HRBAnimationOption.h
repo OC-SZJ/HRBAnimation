@@ -74,7 +74,7 @@ typedef NS_ENUM(NSInteger, HRBAnimationType) {
     /// angle: 弧度
     /// x:竖直方向 [-1,1]
     /// y:水平方向 [-1,1]
-    /// z:暂时没发现有啥用
+    /// z:固定传0
     /// CATransform3DMakeRotation(angle,x,y,z)
     HRBAnimationType_transform3D,
 };
@@ -85,6 +85,11 @@ typedef NS_OPTIONS(NSInteger, HRBDrawAnimationType) {
     HRBDrawAnimationType_Line             = 1 << 8,
     /// 画圆 value 传入 @(CGPoint)
     HRBDrawAnimationType_Circular         = 1 << 9,
+    /// 画字 value 传入 NSString
+    HRBDrawAnimationType_Word             = 1 << 10,
+    /// 画图 value 传入 UIImage
+    HRBDrawAnimationType_Image            = 1 << 11,
+    
     
     ///串行(一个一个来)
     HRBDrawAnimationDrawType_Serial       = 1 << 16,
